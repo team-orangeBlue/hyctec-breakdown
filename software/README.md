@@ -9,6 +9,7 @@
 The boot flow, from power given to the chip, appears to go as follows (does not cover assets used by CopyKey X6):
 1. Turn on keyboard LEDs, initialize SPI flash
 2. Load FAT12 FS driver, BMP processor and font decoder; initialize TFT display, read matching boot logo, add boot labels as necessary and send to display
+  - The BMP processor is given RGB565 images in 320x240. It is unknown whether other formats can be given to it. The images can be made with GIMP, and should be 150.1KB in size.
   - BOOT1.bmp is used for the Copykey X5 and likely X3.
   - BOOT1-NB.bmp is used for the Copykey X5E. The name comes from the fact that the device is also known as "NB-X5E".
   - BOOT-IC.bmp is used for the iCopyKey X100.
@@ -22,6 +23,8 @@ The boot flow, from power given to the chip, appears to go as follows (does not 
 
 Most of the logic of the cloners relies on the main MCU. It drives all the peripherals that are described in the hardware.
 
+It is currently unknown if the MCU has RDP0 or RDP1.
+
 As the MCU only has 256KB of usable space, it is impossible to keep all assets in it, especially backgrounds. As such, next to the MCU is an 64Mbit SPI flash.
 The flash appears to be mapped out as follows (addresses in hex):
 
@@ -33,6 +36,8 @@ START  | END    | USAGE
 601000 | ?????? | Strange pattern
 
 It is impossible to dump the SPI flash with a clip, as the MCU overtakes control. Desoldering is required.
+
+The SPI flash is not verified on boot in any way whatsoever. As such, it is possible to modify the flash, and, for example, alter the backgrounds + icons loaded.
 
 The device shows that it has the ability to store...
 * 16 Mifare Classic tags, each up to 4KB in size
