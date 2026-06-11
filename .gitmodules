@@ -1,0 +1,3 @@
+[submodule "software/cloners/cloner_server"]
+	path = software/cloners/cloner_server
+	url = https://github.com/team-orangeBlue/hyctec-cloner-server
