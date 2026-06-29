@@ -8,7 +8,7 @@ All networking is protected by cyclic XOR with the key of `58c035c6021f67141ca92
 7A] SS SS (payload) [A7
 
 7A] - Header
-SS SS - Frame size, including start+end; big endian
+SS SS - Frame size, including start+end; little endian
 (payload) - actual data packet, ciphered
 [A7 - Trailer
 ```
@@ -18,17 +18,17 @@ After decrypting the payload, you will see the follwing format:
 ```
 CT CT CT CT SE SE IN SN SN SN SN SN SN SN SN SN SN SN SN (payload) CR
 
-CT - counter from 00000001; big endian
-SE SE - Ciphertext size; big endian
+CT - counter from 00000001; little endian
+SE SE - Ciphertext size; little endian
 IN - instruction to server
 SN - Serial number on back label
 (payload) - actual data packet
 CR - CRC8 over payload bytes; polynomial = 0x01, initial = 0xaa
 ```
 
-Please be aware that the server adds a 00 after the instruction code, effectively shifting everything afterwards right by 1 byte.
+Please be aware that the server adds a 00 (ACK) after the instruction code, effectively shifting everything afterwards right by 1 byte.
 
-Formatting seems to be rather inconsistent. Refer to valid exchanges in matching document.
+Formatting seems to be inconsistent at times. Refer to valid exchanges in matching document.
 
 ## Command formatting
 
@@ -68,13 +68,76 @@ f4c0b2ab 04 a0a1a2a3a4a5 b0b1b2b3b4b5 c0c1c2c3c4c5 d0d1d2d3d4d5 0000000000000000
 
 ### A0 (update check)
 
+**WARNING:** Query uses nonstandard formatting. Full frame attached.
+
+**WARNING:** Not fully confirmed. Better return zeroes.
+
 #### Query
 
-[ unknown ]
+```
+01000000 4400 a0 630210117d2e ad2e 4c0022000b51313430343330 0000000000000000 00802ad30b1740ef 0000000000000000 00c8002a95ae40 ad2e 00000000 0001 00 18
+^^^^^^^^ <- Message counter, usually 1
+         ^^^^ <- Frame size, LE
+              ^^ <- Command
+                 ^^^^^^^^^^^^ <- Current version token
+                              ^^^^ <- Device assembly date, not relevant, ignored
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^ <- Device serial number
+                                           ???, then crc -> ^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^ -> 
+```
 
 #### Response
 
-[ unknown ]
+```
+01000000 a200 a0 00 4c0022000b51313430343330 01 000000000000 30f911100263 2cbf0300 829c dd 01 687474703a2f2f636f70796b65792e6879637465632e636e2f5570646174652f7a78636f7079392e68746d6c 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004
+^^^^^^^^ <- Message counter, usually 1
+         ^^^^ <- Frame size, LE
+              ^^ <- Command
+                 ^^ <- ACK (00)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^ <- Device serial number
+                                             ^^ <- Update ACK: if 01, fields set; if 00, firmware is latest (or version/serial doesn't exist) and all following fields are 00
+                                   Always 00 -> ^^^^^^^^^^^^
+                      New version with flipped endianness -> ^^^^^^^^^^^^
+                                         New version size in bytes, LE -> ^^^^^^^^
+                            Downloaded package CRC16 (unknown poly/init values) -> ^^^^
+                               Deciphered package CRC8(?) (unknown poly/init values) -> ^^
+                                             Probably always 01, presence of changelog? -> ^^
+                                                      Changelog URL, then zeroes, then CRC -> ^^^^^^^^ ->
+```
+
+### A1 (update download)
+
+*Caution:* doing this without a prior A0 command will return an E0 NACK instead of an ACK.
+
+#### Query
+
+```
+00000000 0001
+^^^^^^^^      -> File offset, LE (in this case, 0 bytes from start)
+         ^^^^ -> Query size, LE (in this case, 256 bytes)
+```
+
+#### Response
+```
+00000000 0001 5ef4ae71fbe4aa2f0af39afcb6ab570d76be6ddb296d612bb35b9f60c50570a7b30d0eee0fb7ae0c7fc51381d0da935a2df9ffb478283dc7bc28420ef3454245cb4d73920694a716ec3a16e28e57900c0e03c042e6b1aebcb7ef549f5f6755fa8a447cfb10b8b3a5e629ec42a1b0867d2d4b0a10b83d138e11f389bac1c5d3cd789bd80d8b2d5951b85a4d1f7915c0c9fb26f6cc243e5c1e7052ae36e50108c2cff0daa60a50486a12b8001ea26112b80e334bd662b8862ff7442d2a6a0b604aedd2d67fea90df5ace7277d28438fec1bf862ba911faddaaa037f00fd66f74a3e987bef661fd980c66f80748dda9e3226b294108ed8ca33ca8ffeb9bc99cb0e6
+^^^^^^^^ <- File offset, LE
+         ^^^^ <- Real sent payload size (at the end, for example, the server may not give a full 256 byte chunk)
+              ^^^^^^^^ <- Ciphered firmware data ->
+```
+
+### AF (update cancel?)
+
+#### Query
+
+```
+ff000000
+^^^^^^^^ -> ???
+```
+
+#### Response
+```
+00
+^^ -> ACK
+```
 
 ### B1 (calculate nested)
 
