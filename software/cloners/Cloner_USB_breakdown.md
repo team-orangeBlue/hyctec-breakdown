@@ -2,8 +2,6 @@
 
 All data handled appears to be severely obfuscated. A python script to partially decrypt the payloads is present in this folder.
 
-**WARNING:** Due to the fact that obfuscation has not yet been fully explained, some data may change here.
-
 ## Formatting
 
 All payloads are 64 bytes in size.
@@ -17,7 +15,7 @@ As handling data without prior deobfuscation is completely pointless, the refere
 7A] - Header
 IN - Instruction
 (payload) - Actual data, may be zero
-cc - CRC8, generation data unknown
+cc - CRC8 over entire frame before this byte; poly = 0x01, init = 0xaa; no reverse, no output XOR
 [0D - Trailer
 ```
 
@@ -65,7 +63,38 @@ The marker ZZ indicates the zero point, after which all data is 00.
                 ^^^^^^^^ <- Unknown
 ```
 
-### 07 (Upload tag data)
+### 02 (Unknown)
+
+#### Request
+
+```
+ZZ
+```
+
+#### Response
+
+```
+ZZ
+```
+
+### 03 (Version info query)
+
+#### Request
+
+```
+ZZ
+```
+
+#### Response
+
+```
+630210117d2ead2e 4c0022000b51313430343330 0000000000000000 00802ad30b1740ef 0000000000000000 00c8002a95ae40 ad2e 010000000000
+^^^^^^^^^^^^^^^^ <- Current version token
+                 ^^^^^^^^^^^^^^^^^^^^^^^^ <- Device serial
+                                    ?? -> ^^^^^^ ->
+```
+
+### 15 (Upload tag data)
 
 **WARNING:** Unconfirmed
 
@@ -88,25 +117,7 @@ f4d9085e7b890400c823002000000020000000000000000000000000000000000000000000000000
 ZZ
 ```
 
-
-### 11 (Version info query)
-
-#### Request
-
-```
-ZZ
-```
-
-#### Response
-
-```
-630210117d2ead2e 4c0022000b51313430343330 0000000000000000 00802ad30b1740ef 0000000000000000 00c8002a95ae40 ad2e 010000000000
-^^^^^^^^^^^^^^^^ <- Current version token
-                 ^^^^^^^^^^^^^^^^^^^^^^^^ <- Device serial
-                                    ?? -> ^^^^^^ ->
-```
-
-### 44 (HF tag search)
+### 30 (HF tag search)
 
 #### Request
 
@@ -127,7 +138,7 @@ ZZ
                                          ^^    -> UID size
 ```
 
-### 45 (Mifare Classic key auth)
+### 31 (Mifare Classic key auth)
 
 **WARNING: May be incorrect**
 
@@ -149,7 +160,7 @@ ZZ
 ^^    -> ACK/NACK
 ```
 
-### 54 (Mifare Classic block read)
+### 32 (Mifare Classic block read)
 
 #### Request
 
@@ -167,11 +178,11 @@ ZZ
    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    -> Block data
 ```
 
-### 81 (Unknown)
+### 41 (Unknown)
 
 Used during tag reads. No exact format defined yet.
 
-### 84 (LF/Data-On-Powerup tag search)
+### 50 (LF/Data-On-Powerup tag search)
 
 #### Request
 
@@ -196,7 +207,7 @@ ZZ
                                                        ^^^^^^^^^^-^^^^^    -> Effective PACS payload
 ```
 
-### 85 (LF/Data-On-Powerup tag data submit)
+### 51 (LF/Data-On-Powerup tag data submit)
 
 #### Request
 
