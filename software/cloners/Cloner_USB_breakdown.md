@@ -14,7 +14,7 @@ As handling data without prior deobfuscation is completely pointless, the refere
 
 7A] - Header
 IN - Instruction
-(payload) - Actual data, may be zero
+(payload) - Actual data, may be zero - if so, start denoted by ZZ
 cc - CRC8 over entire frame before this byte; poly = 0x01, init = 0xaa; no reverse, no output XOR
 [0D - Trailer
 ```
@@ -25,9 +25,9 @@ cc - CRC8 over entire frame before this byte; poly = 0x01, init = 0xaa; no rever
 
 7A] - Header
 IN - Instruction
-RC - Result code; 01 - ACK (omitted from command formatting info unless specified)
-(payload) - Actual data, may be zero
-cc - CRC8, generation data unknown
+RC - Result code; 01 - ACK, E1 - NACK (omitted from command formatting info unless specified)
+(payload) - Actual data, may be zero - if so, start denoted by ZZ
+cc - CRC8 over entire frame before this byte; poly = 0x01, init = 0xaa; no reverse, no output XOR
 [0D - Trailer
 ```
 
