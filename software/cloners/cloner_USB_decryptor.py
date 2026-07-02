@@ -23,40 +23,6 @@ def permute_bits(byte, order):
         out |= ((byte >> src_bit) & 1) << (len(order) - 1 - i)
     return out
 
-# Checks counted from bytes enumerated from 0
-# WARNING: incorrect bit permutation at byte 1
-# Decrypted: b1
-#  Expected: 4b
-# Decrypted: 81
-#  Expected: 41
-# Decrypted: f5
-#  Expected: 7b
-# Decrypted: 90
-#  Expected: 42
-# WARNING: incorrect bit permutation at byte 25
-# Decrypted: 28
-#  Expected: 88
-# Decrypted: 42
-#  Expected: 24
-# WARNING: incorrect bit permutation at byte 35
-# Decrypted: 31
-#  Expected: 0b
-# Decrypted: 0b
-#  Expected: 85
-# WARNING: incorrect bit permutation at byte 50
-# Decrypted: c1
-#  Expected: 61
-# WARNING: incorrect bit permutation at byte 55
-# Decrypted: 72
-#  Expected: 2e
-# Decrypted: 13
-#  Expected: 07
-# Decrypted: cc
-#  Expected: f0
-# Decrypted: 04
-#  Expected: 10
-
-
 def cb(arr): # Cipher block
     # Step 1: XOR by last byte
     for a in arr:
@@ -94,11 +60,11 @@ def cb(arr): # Cipher block
         # Step 4: do bit permutation based on positional patterns
         for x in range(len(WSO)):
             tbX = WSO[x]
-            if x==2:
-                tbX = permute_bits(tbX, [6,3,0,1,2,7,4,5])
-                WSOF.append(tbX)
-            elif (x>=9 and (x-9)%6 == 0): # Exception rule
+            if x==1 or x==25 or x==35 or x==49 or x==55 or (x>=9 and (x-9)%6 == 0): # I'm not too sure on how to unify these two
                 tbX = permute_bits(tbX, [3,7,6,2,5,1,4,0])
+                WSOF.append(tbX)
+            elif x==2:
+                tbX = permute_bits(tbX, [6,3,0,1,2,7,4,5])
                 WSOF.append(tbX)
             else:
                 WSOF.append(tbX)
