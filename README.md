@@ -19,15 +19,20 @@ A thorough explanation of how the ecosystem of HYCTEC's CopyKey cloners function
 ## Introduction
 
 HYCTEC is a company operated in the Chinese Mainland under the ICP number of 闽ICP备18004668号.
-Its' activity seems to start off in 2021, although it's likely that the people running it have existed in the cloner scene earlier under, or with Zonsin.
+Its' activity seems to start off in approximately 2019, with more prominent appearances in 2021, although it's likely that the people running it have existed in the cloner scene earlier under, or with Zonsin.
 
-The company owns the site of https://hyctec.cn, however it doesn't have any A/AAAA records. MX resolves to some strange site, CNAME resolves to hichina.com (which is also inaccessible), NS resolves to AliDNS.
+The company owns the domain of hyctec.cn, however it doesn't have any A/AAAA records. MX resolves to some strange site, CNAME resolves to hichina.com (which is also inaccessible), NS resolves to AliDNS.
 
 The subdomains in use are...
-* https://copykey.hyctec.cn (cloner online services on TCP port 6391)
+* http://www.hyctec.cn (HTTP ONLY!!! generic China-style company webfront, advertising widespread gate bolt locks)
+* https://copykey.hyctec.cn (cloner online services on TCP port 6391, as well as public device database)
 * https://client.copykey.hyctec.cn (desktop app online services on TCP port 6390)
 * https://doc.copykey.hyctec.cn (Changelogs for chinese cloners, usage info, and other miscellaneous posts)
 * https://en.doc.copykey.hyctec.cn (Changelogs for Copykey X5E, effectively pointless)
+* http://doc.icopykey.hyctec.cn/ (Changelogs + manuals for the iCopyKey X100)
+* http://endoc.icopykey.hyctec.cn/ (Changelogs + manuals for the iCopyKey X100 in English)
+
+They also own https://copykey.hyctec.com which is used by the android app. The domain has an open port 53 and also allows HTTPS connections, however it's likely only used for accounting systems.
 
 The main product is the lineup of dual-tech RFID cloners branded CopyKey (拷贝齐, pinyin: kaobeiqi). The lineup consists of several models, with each being more advanced than the previous, notably:
 * iCopyKey (爱拷贝) X100 (6315-10)
@@ -84,6 +89,16 @@ The main product is the lineup of dual-tech RFID cloners branded CopyKey (拷贝
       - Added support for non-standard LF tags (e.g. Noralsy)
       - Unlocks working with 4K tags as well as 7-byte UIDs
   - **No screen**, meant to be operated by a phone via Bluetooth
+ 
+Some miscellaneous devices also seem to exist:
+* CopyKey X5 YMK (6312-10-10)
+  - Exists at least since August 2021
+  - Device is unknown, valid serial found in instruction manual
+* CopyKey C20 (6301-10-10)
+  - Exists at least since December 2020
+  - Device is unknown, label found in instruction manual; serial number belongs to CopyKey X5 YMK
+
+A patent exists for the devices on CNIPA, under the number of ZL201930040990.5. That patent was filed in 2019, however was terminated in 2021. Supposedly, whatever the patent was protecting is now officially public domain as the owner has not made any effort to renew it or dispute the inability to pay for it within the last 5 years.
 
 ## Software
 
