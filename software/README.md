@@ -23,7 +23,7 @@ The boot flow, from power given to the chip, appears to go as follows (does not 
 
 Most of the logic of the cloners relies on the main MCU. It drives all the peripherals that are described in the hardware.
 
-It is currently unknown if the MCU has RDP0 or RDP1.
+The MCU is configured to be in RDP1, as such reading out internal flash is impossible with a debugger. However the firmware can read itself.
 
 As the MCU only has 256KB of usable space, it is impossible to keep all assets in it, especially backgrounds. As such, next to the MCU is an 64Mbit SPI flash.
 The flash appears to be mapped out as follows (addresses in hex):
@@ -31,13 +31,18 @@ The flash appears to be mapped out as follows (addresses in hex):
 START  | END    | USAGE 
  ---   |   ---  |  ---
 000000 | 200000 | External USB drive for storing cloner software
-200000 |?500000 | Internal FAT12 filesystem for storing image + font assets
+200000 | 500000 | Internal FAT12 filesystem for storing image + font assets
+300000 | ?????? | Internal FAT12 filesystem for storing image + font assets for CopyKey X6 exclusively
+480000 | 480020 | Device settings storage; protected by decoding from RC4 with the key of the device's serial number
+481000 | ?????? | Unknown
+482000 | 48200C | Update payload info
+483000 | 500000 | Obfuscated update payload
 500000 |?50B000 | Storage for 16 IC chips with each being max 4K in size
-601000 | ?????? | Strange pattern
+601000 | ?????? | Unicode-GBK16 table (2nd..?)
 
 It is impossible to dump the SPI flash with a clip, as the MCU overtakes control. Desoldering is required.
 
-The SPI flash is not verified on boot in any way whatsoever. As such, it is possible to modify the flash, and, for example, alter the backgrounds + icons loaded.
+The SPI flash is seemingly not verified on boot in any way whatsoever. As such, it is possible to modify the flash, and, for example, alter the backgrounds + icons loaded.
 
 The device shows that it has the ability to store...
 * 16 Mifare Classic tags, each up to 4KB in size
@@ -45,6 +50,35 @@ The device shows that it has the ability to store...
 * 6 network configurations (not present in iCopyKey X100)
 
 There appears to be no way to extract these dumps out of the SPI flash with software only.
+
+#### Settings
+
+The settings in 480000 at SPI are protected by RC4. The raw bytes can be extracted by encoding the string with RC4 against the device serial number. After that, the format takes on the following:
+```
+69 3d 34 01 // Magic word
+00 // Likely language; 00 = zh-CN, 01 = zh-TW, 02 = en; unset values (like on X100) are unknown
+02 // Unknown
+01 // probably APD (00 = 60s; 01 = 120s; 02 = no APD)
+02 // Unknown, may be volume control (00 = high + low; 01 = low only; 02 = muted)
+03 // brightness (01-10, multiplied by 10 to get a value on a 100% scale)
+12 34 56 12 34 56 // mfc key 1
+a0 a1 a2 a3 a4 a5 // mfc key 2
+d3 f7 d3 f7 d3 f7 // mfc key 3
+2a 95 ae 40 c8 // Unknown
+```
+
+#### Updating
+
+The bootloader checks the SPI at offset 482000 on boot for a string as follows:
+```
+693D3401 ssssssss cccccccc
+^^^^^^^^                   - Magic word
+         ^^^^^^^^          - Firmware size in LE
+                  ^^^^^^^^ - CRC16 for firmware image (poly, init unknown)
+```
+
+Should it see this info, the bootloader will do a CRC check for the firmware image and then write in the image to internal flash.
+If the magic word is FFFFFFFF, the bootloader will skip the update process.
 
 #### Functionality
 
@@ -176,6 +210,16 @@ With the intention to make a phone, smart watch or other digital device a copy o
 
 * Read key starts password detection(?).
 * Return key stops the detection and returns to main menu if already stopped.
+
+##### Miscellaneous inputs
+
+###### USB disk mode (settings)
+
+* Pressing Other-Other-Other-C makes the device mount the 2nd, internal disk contained on SPI that has the image assets and font. For the X6, this is the 2nd disk.
+
+###### System info (settings)
+
+* Pressing Other-Other-Other-Other-C makes the device enter "debug mode" - all network requests instead of being sent to production servers get sent to `192.168.2.90:6391`.
 
 #### Networking
 
