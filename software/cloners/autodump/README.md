@@ -50,3 +50,14 @@ Now every 03 command sent to the device over USB will read flash instead of inte
 
 Since code is re-used across many devices and RAM is treated without much care on a lot of the devices as well, the address of 200033B4 can be repurposed with other firmwares as well.
 
+## How-to
+
+0. Obtain the desktop companion app and the matching scripts from [this repository](https://github.com/team-orangeBlue/hyctec-breakdown/tree/main/software/desktop/software).
+1. Use the `download_firmware.py` script to fetch an encrypted firmware for your device. You will need your device's serial number as displayed and a valid firmware token.
+   - A firmware token looks like this: `630F1011F6300000`. You will need to enter the matching PID (lower half as hex! in example, 6315 would be displayed on device), version values (as seen), then a date token which can be referenced with the [timestamp converter](https://github.com/team-orangeBlue/hyctec-breakdown/blob/main/software/dateconvert.py). The assembly date is not checked and may be left as 0000.
+2. Use the [firmware decryptor](https://github.com/team-orangeBlue/hyctec-breakdown/blob/main/software/cloners/firmware_decrypt.py) to decrypt the firmware
+3. Patch the decrypted result with the patcher
+4. Use the [firmware encryptor](https://github.com/team-orangeBlue/hyctec-breakdown/blob/main/software/cloners/firmware_encrypt.py) to encrypt the patched firmware
+5. Host a fake server using the [script](https://github.com/team-orangeBlue/hyctec-breakdown/blob/main/software/desktop/software/fakeserver.py) in this repository and update the device
+6. Run the `autodump.py` script to dump the firmware. Use default values
+7. Reflash original firmware back to the device by forcing an update to the file you originally downloaded
