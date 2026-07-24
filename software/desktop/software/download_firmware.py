@@ -11,13 +11,7 @@ Pipeline (reverse-engineered, see COMMANDS.md):
   2. cmd 0x27  begin-download (45B) -> file id / total size / (maybe first chunk)   [best-guess]
   3. cmd 0x2A  chunk (17B: key+fileId+offset) in a loop -> reassemble -> verify MD5 [best-guess]
 
-Steps 2-3 are reconstructed statically and NOT yet confirmed on the wire, so this script:
-  * defaults to a DRY RUN: it only does step 1 and PRINTS the exact step-2 request it would send.
-  * with --download it actually sends steps 2-3, logging every frame (tx + rx, raw + decoded)
-    to ./download_debug.log and saving every reply + the reassembled image to ./pulled_files/.
-
-Run the DRY RUN first, paste me download_debug.log, and we refine the field offsets from real bytes
-before hammering the server. Requires: pip install lz4 cryptography
+Requires: pip install lz4 cryptography
 """
 import argparse
 import hashlib
